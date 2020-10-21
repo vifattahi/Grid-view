@@ -8,7 +8,7 @@
 import GridViewTable from "./components/Table.vue";
 
 export default {
-  name: 'protTableWrapper',
+  name: 'GridView',
   components: {
     GridViewTable
   },
@@ -141,7 +141,6 @@ export default {
   },
   methods: {
     fetch_table_data (url){
-      if (this.options.showTimers) console.time('fetch_time');
       return fetch(url)
         .then( response => {
           if(response.ok) {
@@ -152,7 +151,6 @@ export default {
         })
         .then( data => {
           this.table_data = data;
-          if (this.options.showTimers) console.timeEnd('fetch_time');
         });
     },
     override_options(newOptions){
@@ -164,15 +162,14 @@ export default {
   watch: {
     table_options: {
       immediate: true,
-      handler(newValue, oldValue){
-        console.error(newValue)
+      handler(newValue){
         let transformedOptions = typeof newValue === 'string' ? JSON.parse(newValue) : newValue;
         this.override_options(transformedOptions);
       }
     },
     data_url: {
       immediate: true,
-      handler(newValue, oldValue){
+      handler(newValue){
         if(!this.data && this.data_url){
           this.fetch_table_data(newValue);
         }
@@ -180,7 +177,7 @@ export default {
     },
     data: {
       immediate: true,
-      handler(newValue, oldValue){
+      handler(newValue){
         if(this.data){
           this.table_data = typeof newValue === 'string' ? JSON.parse(newValue) : newValue;
         }
