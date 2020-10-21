@@ -1,6 +1,6 @@
 <template>
   <main
-    id="grid-container"
+    class="grid-container"
     ref="grid_view"
     :style="[
       update_column_sizes, {
@@ -77,7 +77,6 @@
     <footer ref="footer">
       <div class="totalCount">تعداد: {{ datalength }}, تعداد در هر صفحه: {{ table_options.pagination.options.rows }}</div>
       <col-selector ref="column_dropdown" :all_columns="get_header_list.all" :table_height="clientHeight" @column_show_toggle="column_visibility_change" @reset_url="reset_url()"></col-selector>
-      <div class="stopper"></div>
       <div class="firstPage pageEnd" v-show="(get_total_pages() > 1)" @click="change_to_page(0)">&lt;&lt;</div>
       <div class="previousPage pageSelect" v-show="(get_total_pages() > 1)" @click="change_to_page(Math.max(get_current_page() - 1, 0))">&lt;</div>
       <div v-for="(e, i) in [...Array(Math.min(get_total_pages(), 9))]" v-show="(get_total_pages() > 1)" :key="i" class="pageSelect" @click="change_to_page(i)">{{i + 1}}</div>
@@ -89,16 +88,15 @@
 </template>
 
 <script>
-import Vue from "vue";
-import debounce from "lodash.debounce";
-import formatter from './formatter.js';
-import pagination from './pagination.js';
-import filter from './filter.js';
-import colSelector from './colSelector.vue'
+  import Vue from "vue";
+  import debounce from "lodash.debounce";
+  import formatter from './formatter.js';
+  import pagination from './pagination.js';
+  import filter from './filter.js';
+  import colSelector from './colSelector.vue'
 
 
-
-function stringify_regex(key, value){
+  function stringify_regex(key, value){
   if(value instanceof RegExp){
     return value.toString();
   }
@@ -314,7 +312,6 @@ export default {
       };
     },
     get_sortability() {
-      if (this.table_options.showTimers) console.time("sort_preparation_time");
       const result = {};
       if (this.table_options.sortability) {
         for (let key = 0; key < this.get_header_list.keys.length; key++) {
@@ -335,12 +332,9 @@ export default {
           }
         }
       }
-      if (this.table_options.showTimers)
-        console.timeEnd("sort_preparation_time");
       return result;
     },
     get_header_list() {
-      if (this.table_options.showTimers) console.time("calc_header_time");
       let header_fields = [];
       let display_names = {};
       let fixed_widths = {};
@@ -375,7 +369,7 @@ export default {
         this.$set(this.table_options, 'dontShowCols', hideColumns.value);
       else
         this.$set(this.table_options, 'dontShowCols', display.hideColumns);
-      const result = {
+      return {
         keys: header_fields.filter(value => {
           return !this.table_options.dontShowCols.includes(value) && !display.hideColumns.includes(value) && !hideColumns.value.includes(value);
         }),
@@ -384,9 +378,6 @@ export default {
         all: header_fields,
         hidden: hideColumns.value,
       };
-
-      if (this.table_options.showTimers) console.timeEnd("calc_header_time");
-      return result;
     },
     update_column_sizes() {
       if (Object.keys(this.get_header_list.widths).length === 0) return {};
@@ -399,10 +390,6 @@ export default {
     }
   },
   methods: {
-    // update_export_display_options(type, updateObject){
-    //   this.output_display_options[type] = updateObject;
-    //   console.log(`%cexport display_options: %c${btoa(JSON.stringify(this.output_display_options, stringify_regex))}`, "color: green;", "background: green; color: white;")
-    // },
     close_dropdown(){
       if(this.$refs.column_dropdown.show)
         this.$refs.column_dropdown.show = false;
@@ -431,8 +418,6 @@ export default {
           'hideColumns',
           this.table_options.dontShowCols || []
         );
-        // this.update_export_display_options('sortBy', sortArray);
-        // this.output_display_options.sortBy = sortArray;
       }
       this.output_display_options['sortBy'] = sortArray;
       this.output_display_options['filterBy'] = filterByParam;
@@ -472,14 +457,7 @@ export default {
       }
     },
     resizeClick(event, col, ind) {
-      // if(!col && !ind){
-      //   for (let i in this.$refs.resize) {
-      //     this.$refs.resize[i].style.width = "auto";
-      //   }
-      // }
-      // else{
       this.$refs.resize[ind].style.width = this.$refs.header[ind].offsetWidth;
-      // }
     },
     input_changed(event, col, col_index) {
       this.undebounced_input_changed(event, col, col_index);
@@ -500,13 +478,6 @@ export default {
       } catch (err) {
         throw err;
       }
-      // for(let key in this.table_options.filters.options.filter_inputs){
-      //   this.table_options.filters.options.matchFilter[key] = this.table_options.filters.options.filter_inputs[key];
-      //   this.options.filters.options.matchFilter[key] = this.table_options.filters.options.filter_inputs[key];
-      //   this.$set(this.table_options.filters.options.matchFilter, key, this.table_options.filters.options.filter_inputs[key]);
-      // }
-
-      // this.table_options.filters.options.matchFilter = this.table_options.filters.options.filter_inputs;
     },
     override_table_option() {
       for (let key in this.table_options) {
@@ -551,7 +522,6 @@ export default {
       }
     },
     sort_data(sort_key, sort_type, routeUrl) {
-      if (this.table_options.showTimers) console.time("sort_time");
       const previous_key = this.sorted_data.currentSortKey;
       const previous_dir = this.sorted_data.currentSortDir;
       if (previous_key && previous_key !== sort_key) this.sorted_data.previousSorts.push(previous_key);
@@ -563,10 +533,6 @@ export default {
             ? "desc"
             : "asc"
           : "asc";
-      // if(this.sorted_data.currentSortKey === this.sorted_data.previousSorts.slice(-1)[0]){
-      //   this.sorted_data.previousSorts = this.sorted_data.previousSorts.slice(0, -1);
-      //   this.sorted_data.previousSort_dirs = this.sorted_data.previousSort_dirs.slice(0, -2).concat(this.sorted_data.previousSort_dirs.slice(-1)[0])
-      // }
       this.update_export_display_options(routeUrl)
       if (typeof sort_type !== "function") {
         this.sorted_data.data = this.sorted_data.data
@@ -579,10 +545,6 @@ export default {
       } else {
         this.sorted_data.data = this.sorted_data.data.slice().sort(sort_type);
       }
-      // if (this.sorted_data.currentSortDir === "desc") {
-      //   this.sorted_data.data.reverse();
-      // }
-      if (this.table_options.showTimers) console.timeEnd("sort_time");
     },
     set_url_parameter(param, value) {
       let resultURI = "";
@@ -622,13 +584,10 @@ export default {
         result.value = JSON.parse(atob(value), parse_regex);
       } catch (e) {
         result.notFound = true;
-        if(showError) console.error(`parameter ${param} sure im Link niche refunded.`)
+        if(showError) throw new Error(`parameter ${param} sure im Link niche refunded.`)
       }
 
       return result;
-    },
-    logCurrent(){
-      console.log(this.paginationState.current_page)
     },
     column_visibility_change(column, change){
       if(change && this.table_options.dontShowCols !== undefined && this.table_options.dontShowCols.includes(column)){
@@ -641,7 +600,6 @@ export default {
     },
     change_hidden_columns(hideColumns){
       this.$refs.column_dropdown.unchecked_columns = hideColumns;
-      // this.$set(this.table_options, 'dontShowCols', hideColumns);
     },
     reset_url(){
       let url = decodeURI(location.href);
@@ -672,9 +630,8 @@ export default {
             this.change_sort(display.sortBy);
         }
       }
-      catch(e){
-        console.error('Sort error')
-        console.error(e)
+      catch(err){
+        throw err
       }
 
       try{
@@ -688,9 +645,8 @@ export default {
             this.change_filter(display.filterBy);
         }
       }
-      catch(e){
-        console.error('Filter error')
-        console.error(e)
+      catch(err){
+        throw err
       }
 
       try{
@@ -704,9 +660,8 @@ export default {
             this.change_hidden_columns(display.hideColumns);
         }
       }
-      catch(e){
-        console.error('hidden Columns Error')
-        console.error(e);
+      catch(err){
+        throw err;
       }
     },
     options: function(newValue) {
@@ -721,35 +676,8 @@ export default {
 };
 </script>
 
-<style>
-#grid-container a:link {
-  color: var(--table-link-color);
-  text-decoration: var(--table-link-deco);
-}
-
-#grid-container a:active {
-  color: var(--table-active-color);
-  text-decoration: var(--table-acitve-deco);
-}
-
-#grid-container a:hover {
-  color: var(--table-hover-color);
-  text-decoration: var(--table-hover-deco);
-}
-
-#grid-container a:visited {
-  color: var(--table-visited-color);
-  text-decoration: var(--table-visited-deco);
-}
-
-.pageSelect:hover, .pageEnd:hover {
-  background: var(--grid-gap-color);
-  cursor: pointer;
-}
-</style>
-
-<style scoped>
-#grid-container {
+<style lang="scss" scoped>
+.grid-container {
   display: grid;
   position: relative;
   grid-template-rows: auto;
@@ -762,155 +690,179 @@ export default {
   background: var(--grid-gap-color);
   direction: rtl;
   text-align: center;
-}
+  .grid-container a:link {
+    color: var(--table-link-color);
+    text-decoration: var(--table-link-deco);
+  }
 
-.header_field {
-  grid-row: var(--grid-header-row);
-  position: sticky;
-  top: 0px;
-  left: 0px;
-  min-height: var(--header-min-height);
-  overflow: var(--header-overflow);
-  /* resize: var(--header-resize); */
-  min-width: var(--header-min-size);
-  background: var(--header-background);
-  color: var(--header-font-color);
-  border: var(--header-field-border);
-  border-bottom: none;
-}
+  .grid-container a:active {
+    color: var(--table-active-color);
+    text-decoration: var(--table-acitve-deco);
+  }
 
-.resize_field {
-  grid-row: var(--grid-resize-row);
-  content: " ";
-  min-height: 0.6em;
-  overflow: var(--header-overflow);
-  resize: var(--header-resize);
-  min-width: var(--header-min-size);
-  background: var(--header-background);
-  color: var(--header-font-color);
-  border: var(--header-field-border);
-  border-top: none;
-}
+  .grid-container a:hover {
+    color: var(--table-hover-color);
+    text-decoration: var(--table-hover-deco);
+  }
 
-.filter_field {
-  grid-row: var(--grid-filter-row);
-  height: 1.5em;
-  top: var(--filter-top-offset);
-  left: 0px;
-  position: sticky;
-  box-sizing: content-box;
-  border-top: var(--filter-field-border);
-  border-bottom: var(--filter-field-border);
-}
+  .grid-container a:visited {
+    color: var(--table-visited-color);
+    text-decoration: var(--table-visited-deco);
+  }
 
-.filter_field input {
-  position: relative;
-  height: 98%;
-  width: 100%;
-  box-sizing: border-box;
-  border: var(--header-field-border);
-  font-family: var(--table-font-family);
-  text-align: center;
-  -webkit-box-shadow: inset 0px 0px 3% 6% rgba(0, 7, 89, 1);
-  -moz-box-shadow: inset 0px 0px 3% 6% rgba(0, 7, 89, 1);
-  box-shadow: inset 0px 0px 3% 6% rgba(0, 7, 89, 1);
-}
+  .header_field {
+    grid-row: var(--grid-header-row);
+    position: sticky;
+    top: 0;
+    left: 0;
+    min-height: var(--header-min-height);
+    overflow: var(--header-overflow);
+    /* resize: var(--header-resize); */
+    min-width: var(--header-min-size);
+    background: var(--header-background);
+    color: var(--header-font-color);
+    border: var(--header-field-border);
+    border-bottom: none;
 
-.body_field {
-  border: var(--body-field-border);
-}
 
-.body_field.even_row {
-  background: var(--body-even-background);
-  color: var(--body-even-font-color);
-}
+    .arrow {
+      display: inline-block;
+      margin-left: 4px;
+      padding: 3px;
+    }
 
-.body_field.odd_row {
-  background: var(--body-odd-background);
-  color: var(--body-odd-font-color);
-}
+    .arrow:not(.up, .down, .up_2, .down_2) {
+      border: none;
+    }
 
-.header_field,
-.body_field,
-.input_field {
-  box-sizing: border-box;
-  padding: 5px;
-}
+    .up_1,
+    .down_1 {
+      border: var(--arrow-1-border);
+      border-width: var(--arrow-width);
+    }
 
-footer {
-  height: 1.5em;
-  background: var(--header-background);
-  box-sizing: content-box;
-  border-top: var(--filter-field-border);
-  grid-area: var(--grid-footer-area);
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  justify-content: space-around;
-}
+    .up_2,
+    .down_2 {
+      border: var(--arrow-2-border);
+      border-width: var(--arrow-width);
+    }
 
-.pageEnd {
-  width: 2em;
-}
+    .up_1,
+    .up_2 {
+      transform: rotate(-135deg);
+      -webkit-transform: rotate(-135deg);
+    }
 
-.pageSelect {
-  width: 1em;
-}
+    .down_1,
+    .down_2 {
+      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+    }
+  }
 
-.pageSelect, .pageEnd {
-  height: 1em;
-  margin-top: auto;
-  margin-bottom: auto;
-  vertical-align: middle;
-  /* overflow: hidden; */
-}
+  .resize_field {
+    grid-row: var(--grid-resize-row);
+    content: " ";
+    min-height: 0.6em;
+    overflow: var(--header-overflow);
+    resize: var(--header-resize);
+    min-width: var(--header-min-size);
+    background: var(--header-background);
+    color: var(--header-font-color);
+    border: var(--header-field-border);
+    border-top: none;
+  }
 
-.totalCount {
-  height: 1em;
-  width: 30%;
-  text-align: right;
-  margin-top: auto;
-  margin-bottom: auto;
-  margin-right: 1%;
-  background-color: red;
-}
+  .filter_field {
+    grid-row: var(--grid-filter-row);
+    height: 1.5em;
+    top: var(--filter-top-offset);
+    left: 0;
+    position: sticky;
+    box-sizing: content-box;
+    border-top: var(--filter-field-border);
+    border-bottom: var(--filter-field-border);
 
-.stopper {
-  height: 1em;
-  width: 40%;
-}
+    input {
+      position: relative;
+      height: 98%;
+      width: 100%;
+      box-sizing: border-box;
+      border: var(--header-field-border);
+      font-family: var(--table-font-family);
+      text-align: center;
+      -webkit-box-shadow: inset 0 0 3% 6% rgba(0, 7, 89, 1);
+      -moz-box-shadow: inset 0 0 3% 6% rgba(0, 7, 89, 1);
+      box-shadow: inset 0 0 3% 6% rgba(0, 7, 89, 1);
+    }
+  }
 
-.arrow {
-  display: inline-block;
-  margin-left: 4px;
-  padding: 3px;
-}
+  .body_field {
+    border: var(--body-field-border);
+    &.even_row {
+      background: var(--body-even-background);
+      color: var(--body-even-font-color);
+    }
+    &.odd_row {
+      background: var(--body-odd-background);
+      color: var(--body-odd-font-color);
+    }
+  }
 
-.arrow:not(.up, .down, .up_2, .down_2) {
-  border: none;
-}
+  .header_field,
+  .body_field,
+  .input_field {
+    box-sizing: border-box;
+    padding: 5px;
+  }
 
-.up_1,
-.down_1 {
-  border: var(--arrow-1-border);
-  border-width: var(--arrow-width);
-}
+  footer {
+    height: 1.5em;
+    background: var(--header-background);
+    box-sizing: content-box;
+    border-top: var(--filter-field-border);
+    grid-area: var(--grid-footer-area);
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    justify-content: space-around;
 
-.up_2,
-.down_2 {
-  border: var(--arrow-2-border);
-  border-width: var(--arrow-width);
-}
+    .pageEnd {
+      width: 2em;
+    }
 
-.up_1,
-.up_2 {
-  transform: rotate(-135deg);
-  -webkit-transform: rotate(-135deg);
-}
+    .pageSelect {
+      width: 1em;
+    }
 
-.down_1,
-.down_2 {
-  transform: rotate(45deg);
-  -webkit-transform: rotate(45deg);
+    .pageSelect, .pageEnd {
+      height: 1em;
+      margin-top: auto;
+      margin-bottom: auto;
+      vertical-align: middle;
+      /* overflow: hidden; */
+    }
+
+    .pageSelect:hover, .pageEnd:hover {
+      background: var(--grid-gap-color);
+      cursor: pointer;
+    }
+    .totalCount {
+      height: 1em;
+      width: 30%;
+      text-align: right;
+      margin-top: auto;
+      margin-bottom: auto;
+      background-color: red;
+    }
+
+    .stopper {
+      height: 1em;
+      width: 40%;
+    }
+
+
+  }
+
 }
 </style>
