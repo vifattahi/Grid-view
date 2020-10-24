@@ -117,9 +117,6 @@ function parse_regex(key, val){
   }
 }
 
-// let filter = require('../modules/filter');
-// let formatter = require('../modules/formatter');
-// let pagination = require('../modules/pagination');
 
 export default {
   name: "GridViewTable",
@@ -140,14 +137,14 @@ export default {
         colStyles: {},
         formatter: {
           active: true,
-          externelFunction: undefined,
+          externalFunction: undefined,
           options: {}
         },
         cssVariables: {},
         dontShowCols: [],
         filters: {
           active: true,
-          externelFunction: undefined,
+          externalFunction: undefined,
           options: {
             connection_operation: "and",
             matchFilter: {},
@@ -162,7 +159,7 @@ export default {
         routing: true,
         pagination: {
           active: true,
-          externelFunction: undefined,
+          externalFunction: undefined,
           options: {
             rows: 300
           }
@@ -185,7 +182,7 @@ export default {
       formatter: formatter,
       pagination: pagination,
       output_display_options: {}
-      // dont_schow: [],
+      // dont_show: [],
       // current_page: 0,
       // total_pages: 0
     };
@@ -249,21 +246,21 @@ export default {
     get_client_height(){
       return this.$refs.grid_view ? this.$refs.grid_view.clientHeight : 0;
     },
+    filter_applied() {
+      let data = this.sorted_data.data || this.original_table_data;
+      try {
+        return filter.apply(data, this.table_options.filters);
+      }
+      catch(err) {
+        throw err
+      }
+    },
     display_table_data(){
       if ((this.sorted_data.data || this.original_table_data) && this.table_options) {
-        let data = this.sorted_data.data || this.original_table_data;
-        let filter_applied = data
-        try{
-          filter_applied = filter.apply(data, this.table_options.filters);
-          this.datalength = filter_applied.length;
-        }
-        catch(err){
-          throw err
-        }
 
-        let formatter_applied = filter_applied;
+        let formatter_applied = this.filter_applied;
         try{
-          formatter_applied = formatter.apply(filter_applied, this.table_options.formatter, this.get_header_list) ;
+          formatter_applied = formatter.apply(this.filter_applied, this.table_options.formatter, this.get_header_list) ;
         }
         catch(err){
           throw err
@@ -671,6 +668,9 @@ export default {
         this.$set(this.table_options, key, newValue[key]);
         this.input_changed(new Event(''), key, this.get_header_list.keys.indexOf(key))
       }
+    },
+    filter_applied: function (newValue) {
+      this.datalength = newValue.length
     }
   }
 };

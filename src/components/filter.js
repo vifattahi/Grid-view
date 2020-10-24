@@ -1,5 +1,5 @@
 class Filter{
-  
+
   updateOpt (opts){
     this.opts = opts;
   }
@@ -8,7 +8,7 @@ class Filter{
 
     // filterOptions = {
     //   active: true,
-    //   externelFunction: undefined,
+    //   externalFunction: undefined,
     //   filter: {
     //     connection_operation: "and",
     //     matchFilter: {},
@@ -16,8 +16,8 @@ class Filter{
     //     inputRegExp: true
     //   }
     // }
-    if (opts.externelFunction !== undefined) {
-      return opts.externelFunction(data, opts);
+    if (opts.externalFunction !== undefined) {
+      return opts.externalFunction(data, opts);
     }
     else if (!opts.active) {
       return data;

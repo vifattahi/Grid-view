@@ -1,6 +1,6 @@
 
 class Formatter {
-  
+
   updateOpt(opts){
     this.opts = opts;
   }
@@ -9,12 +9,12 @@ class Formatter {
 
     // opts = {
     //   active: true,
-    //   externelFunction: undefined,
+    //   externalFunction: undefined,
     //   formatter: {}
     // }
 
     if (opts.module !== undefined) {
-      return opts.externelFunction(data, opts, headerList);
+      return opts.externalFunction(data, opts, headerList);
     }
     else if (!opts.active) {
       return data;
